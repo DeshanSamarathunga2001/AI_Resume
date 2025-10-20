@@ -1,30 +1,29 @@
-import React from 'react'
-import { useState } from 'react'
-import Navbar from '~/components/Navbar'
-import FileUploader from '~/components/FileUploader'
-import { usePuterStore } from '~/lib/puter'
-import { useNavigate } from 'react-router'
+import {type FormEvent, useState} from 'react'
+import Navbar from "~/components/Navbar";
+import FileUploader from "~/components/FileUploader";
+import {usePuterStore} from "~/lib/puter";
+import {useNavigate} from "react-router";
 import {convertPdfToImage} from "~/lib/pdf2img";
 import {generateUUID} from "~/lib/utils";
-import {prepareInstructions} from "../../constant";
+import {prepareInstructions} from "../../constants";
 
-const upload = () => {
+const Upload = () => {
     const { auth, isLoading, fs, ai, kv } = usePuterStore();
     const navigate = useNavigate();
-    const [isProcessing, setIsProcessing] = useState(false)
-    const [statusText, setStatusText] = useState('')
-    const [file, setFile] = useState<File | null>(null)
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [statusText, setStatusText] = useState('');
+    const [file, setFile] = useState<File | null>(null);
 
-    const handeleFileSelect = (file: File | null) => {
-       setFile(file)
+    const handleFileSelect = (file: File | null) => {
+        setFile(file)
     }
+
     const handleAnalyze = async ({ companyName, jobTitle, jobDescription, file }: { companyName: string, jobTitle: string, jobDescription: string, file: File  }) => {
         setIsProcessing(true);
 
         setStatusText('Uploading the file...');
         const uploadedFile = await fs.upload([file]);
         if(!uploadedFile) return setStatusText('Error: Failed to upload file');
-
 
         setStatusText('Converting to image...');
         const imageFile = await convertPdfToImage(file);
@@ -64,7 +63,7 @@ const upload = () => {
         navigate(`/resume/${uuid}`);
     }
 
-    const handleSubmit = (FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form = e.currentTarget.closest('form');
         if(!form) return;
@@ -83,49 +82,45 @@ const upload = () => {
         <main className="bg-[url('/images/bg-main.svg')] bg-cover">
             <Navbar />
 
-            <section className="main-section py-10  ">
+            <section className="main-section">
                 <div className="page-heading py-16">
-                    <h1>Smart Feedback for your dream job</h1>
+                    <h1>Smart feedback for your dream job</h1>
                     {isProcessing ? (
                         <>
                             <h2>{statusText}</h2>
-                            <img src='/images/resume-scan.gif' className='w-full'/>
+                            <img src="/images/resume-scan.gif" className="w-full" />
                         </>
-                    ):(
+                    ) : (
                         <h2>Drop your resume for an ATS score and improvement tips</h2>
                     )}
-                    
                     {!isProcessing && (
-                        <form id='upload-form' onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8'>
-                            <div className='form-div'>
-                                <label htmlFor='company-name'>Company Name</label>
-                                <input type='text' id='company-name' name='company-name' placeholder='Company Name'  />
+                        <form id="upload-form" onSubmit={handleSubmit} className="flex flex-col gap-4 mt-8">
+                            <div className="form-div">
+                                <label htmlFor="company-name">Company Name</label>
+                                <input type="text" name="company-name" placeholder="Company Name" id="company-name" />
                             </div>
-                            <div className='form-div'>
-                                <label htmlFor='job-title'>Job Title</label>
-                                <input type='text' id='job-title' name='job-title' placeholder='Job Title'  />
+                            <div className="form-div">
+                                <label htmlFor="job-title">Job Title</label>
+                                <input type="text" name="job-title" placeholder="Job Title" id="job-title" />
                             </div>
-                            <div className='form-div'>
-                                <label htmlFor='job-description'>Job Description</label>
-                                <textarea rows={5} id='job-description' name='job-description' placeholder='Job Description'  />
-                            </div>
-                             <div className='form-div'>
-                                <label htmlFor='uploader'>Upload Resume</label>
-                                <FileUploader onFileSelect={handeleFileSelect}/>
+                            <div className="form-div">
+                                <label htmlFor="job-description">Job Description</label>
+                                <textarea rows={5} name="job-description" placeholder="Job Description" id="job-description" />
                             </div>
 
-                            <button className='primary-button' type='submit'>
+                            <div className="form-div">
+                                <label htmlFor="uploader">Upload Resume</label>
+                                <FileUploader onFileSelect={handleFileSelect} />
+                            </div>
+
+                            <button className="primary-button" type="submit">
                                 Analyze Resume
                             </button>
-
                         </form>
                     )}
-
                 </div>
-                {/* Upload form or component can be added here */}
             </section>
         </main>
     )
 }
-
-export default upload
+export default Upload
